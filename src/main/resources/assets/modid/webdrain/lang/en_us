@@ -1,1 +1,4 @@
-
+{
+  "key.webdrain.toggle": "Toggle Auto Web Drain",
+  "key.category.webdrain.main": "Auto Web Drain"
+}
