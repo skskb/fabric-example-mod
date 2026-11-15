@@ -6,8 +6,8 @@
   "description": "Instantly drains other players' water by placing cobwebs on it.",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.webdrain.WebDrainClient"],
-    "modmenu": ["com.webdrain.WebDrainModMenu"]
+    "client": ["com.example.webdrain.WebDrainClient"],
+    "modmenu": ["com.example.webdrain.WebDrainModMenu"]
   },
   "suggests": {
     "modmenu": "*"

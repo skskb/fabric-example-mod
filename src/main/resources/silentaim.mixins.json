@@ -1,7 +1,0 @@
-{
-  "required": true,
-  "package": "com.example.silentaim.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "client": ["ClientPlayerInteractionManagerMixin"],
-  "injectors": { "defaultRequire": 1 }
-}
