@@ -35,7 +35,7 @@ public class WebDrainClient implements ClientModInitializer {
     private static final int PLAYER_Y_BELOW = 4;
     private static final int PLAYER_Y_ABOVE = 2;
     private static final double MAX_PLAYER_DISTANCE = 12.0;
-    private static final double SAFE_RADIUS = 2.0; // never web water this close to you
+    private static final double SAFE_RADIUS = 2.0; // water this close to you is protected (if enabled)
 
     private static boolean enabled = true;
     private static int cooldown = 0;
@@ -98,9 +98,9 @@ public class WebDrainClient implements ClientModInitializer {
 
                         Vec3d center = Vec3d.ofCenter(pos);
 
-                        // Never touch water right around you
+                        // Optional safe zone around you
                         double selfDist = distToPlayer(center, self);
-                        if (selfDist <= SAFE_RADIUS) continue;
+                        if (cfg.safeRadiusEnabled && selfDist <= SAFE_RADIUS) continue;
 
                         // Only web water that is closer to another player than to you
                         double nearestOther = Double.MAX_VALUE;
