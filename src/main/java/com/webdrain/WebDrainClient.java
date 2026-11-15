@@ -29,14 +29,14 @@ import java.util.Set;
 public class WebDrainClient implements ClientModInitializer {
 
     // --- Tweakables ---
-    private static final double MAX_REACH = 4.0;           // max distance from your eyes
-    private static final int PLAYER_RADIUS = 4;            // horizontal scan radius around other players
-    private static final int PLAYER_Y_BELOW = 4;           // blocks below their feet to scan
-    private static final int PLAYER_Y_ABOVE = 2;           // blocks above their feet to scan
-    private static final int MAX_PLACEMENTS_PER_TICK = 16; // raised so multiple buckets get handled at once
+    private static final double MAX_REACH = 4.0;
+    private static final int PLAYER_RADIUS = 4;
+    private static final int PLAYER_Y_BELOW = 4;
+    private static final int PLAYER_Y_ABOVE = 2;
     private static final double MAX_PLAYER_DISTANCE = 12.0;
 
     private static boolean enabled = true;
+    private static int cooldown = 0;
     private static KeyBinding toggleKey;
 
     @Override
@@ -68,6 +68,9 @@ public class WebDrainClient implements ClientModInitializer {
         ClientPlayerEntity self = client.player;
         if (findCobwebHotbarSlot(self) == -1) return;
 
+        WebDrainConfig cfg = WebDrainConfig.INSTANCE;
+        if (cooldown > 0) { cooldown--; return; }
+
         Vec3d eye = self.getEyePos();
         List<BlockPos> sources = new ArrayList<>();
         List<BlockPos> flowing = new ArrayList<>();
@@ -85,8 +88,7 @@ public class WebDrainClient implements ClientModInitializer {
                         BlockPos pos = base.add(dx, dy, dz);
                         if (!seen.add(pos)) continue;
 
-                        // Only plain water blocks. Skips kelp, seagrass and waterlogged blocks,
-                        // which a cobweb can't replace and which would waste placements.
+                        // Plain water only (skips kelp, seagrass, waterlogged blocks)
                         if (!client.world.getBlockState(pos).isOf(Blocks.WATER)) continue;
 
                         FluidState fluid = client.world.getFluidState(pos);
@@ -97,7 +99,7 @@ public class WebDrainClient implements ClientModInitializer {
                         if (eye.squaredDistanceTo(Vec3d.ofCenter(pos)) > MAX_REACH * MAX_REACH) continue;
 
                         if (fluid.isStill()) sources.add(pos);
-                        else flowing.add(pos);
+                        else if (cfg.webFlowingWater) flowing.add(pos);
                     }
                 }
             }
@@ -105,7 +107,7 @@ public class WebDrainClient implements ClientModInitializer {
 
         if (sources.isEmpty() && flowing.isEmpty()) return;
 
-        // Sources first, then flowing water that keeps refilling the area
+        // Sources first, then flowing water (if enabled)
         List<BlockPos> targets = new ArrayList<>(sources);
         targets.addAll(flowing);
 
@@ -114,9 +116,8 @@ public class WebDrainClient implements ClientModInitializer {
         int placed = 0;
 
         for (BlockPos pos : targets) {
-            if (placed >= MAX_PLACEMENTS_PER_TICK) break;
+            if (placed >= cfg.placementsPerTick) break;
 
-            // Re-pick a stack each time in case one ran out mid-tick
             int webSlot = findCobwebHotbarSlot(self);
             if (webSlot == -1) break;
 
@@ -132,7 +133,8 @@ public class WebDrainClient implements ClientModInitializer {
 
         if (swapped) {
             self.getInventory().setSelectedSlot(originalSlot);
-            client.interactionManager.tick(); // syncs the selected slot to the server right away
+            client.interactionManager.tick(); // syncs the selected slot to the server
+            cooldown = cfg.tickDelay;
         }
     }
 
