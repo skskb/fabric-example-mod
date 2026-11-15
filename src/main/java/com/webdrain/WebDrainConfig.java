@@ -1,4 +1,4 @@
-package com.example.webdrain;
+package com.webdrain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
