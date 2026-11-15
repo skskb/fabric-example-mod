@@ -26,18 +26,27 @@ public class WebDrainConfigScreen extends Screen {
             b.setMessage(flowingText(cfg));
         }).dimensions(x, y, 200, 20).build());
 
-        addDrawableChild(new IntSlider(x, y + 28, 200, 20, "Webs per round", 1, 16,
+        addDrawableChild(ButtonWidget.builder(safeText(cfg), b -> {
+            cfg.safeRadiusEnabled = !cfg.safeRadiusEnabled;
+            b.setMessage(safeText(cfg));
+        }).dimensions(x, y + 28, 200, 20).build());
+
+        addDrawableChild(new IntSlider(x, y + 56, 200, 20, "Webs per round", 1, 16,
                 cfg.placementsPerTick, v -> cfg.placementsPerTick = v));
 
-        addDrawableChild(new IntSlider(x, y + 56, 200, 20, "Delay (ticks)", 0, 20,
+        addDrawableChild(new IntSlider(x, y + 84, 200, 20, "Delay (ticks)", 0, 20,
                 cfg.tickDelay, v -> cfg.tickDelay = v));
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Done"), b -> close())
-                .dimensions(x, y + 96, 200, 20).build());
+                .dimensions(x, y + 124, 200, 20).build());
     }
 
     private static Text flowingText(WebDrainConfig cfg) {
         return Text.literal("Web flowing water: " + (cfg.webFlowingWater ? "ON" : "OFF"));
+    }
+
+    private static Text safeText(WebDrainConfig cfg) {
+        return Text.literal("Safe radius: " + (cfg.safeRadiusEnabled ? "ON" : "OFF"));
     }
 
     @Override
