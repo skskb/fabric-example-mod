@@ -121,7 +121,6 @@ public class WebDrainClient implements ClientModInitializer {
 
         if (sources.isEmpty() && flowing.isEmpty()) return;
 
-        // Sources first, then flowing water (if enabled)
         List<BlockPos> targets = new ArrayList<>(sources);
         targets.addAll(flowing);
 
@@ -147,7 +146,7 @@ public class WebDrainClient implements ClientModInitializer {
 
         if (swapped) {
             self.getInventory().setSelectedSlot(originalSlot);
-            client.interactionManager.tick(); // syncs the selected slot to the server
+            client.interactionManager.tick();
             cooldown = cfg.tickDelay;
         }
     }
@@ -161,6 +160,7 @@ public class WebDrainClient implements ClientModInitializer {
 
     // Distance from a point to the player's feet or eyes, whichever is closer
     private static double distToPlayer(Vec3d point, PlayerEntity p) {
-        return Math.min(point.distanceTo(p.getPos()), point.distanceTo(p.getEyePos()));
+        Vec3d feet = new Vec3d(p.getX(), p.getY(), p.getZ());
+        return Math.min(point.distanceTo(feet), point.distanceTo(p.getEyePos()));
     }
 }
