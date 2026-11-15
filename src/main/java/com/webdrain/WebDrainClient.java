@@ -1,4 +1,4 @@
-package com.example.webdrain;
+package com.webdrain;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -9,6 +9,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.FluidTags;
@@ -34,6 +35,7 @@ public class WebDrainClient implements ClientModInitializer {
     private static final int PLAYER_Y_BELOW = 4;
     private static final int PLAYER_Y_ABOVE = 2;
     private static final double MAX_PLAYER_DISTANCE = 12.0;
+    private static final double SAFE_RADIUS = 2.0; // never web water this close to you
 
     private static boolean enabled = true;
     private static int cooldown = 0;
@@ -94,9 +96,21 @@ public class WebDrainClient implements ClientModInitializer {
                         FluidState fluid = client.world.getFluidState(pos);
                         if (!fluid.isIn(FluidTags.WATER)) continue;
 
-                        if (self.getBlockPos().equals(pos)) continue; // not our own water
+                        Vec3d center = Vec3d.ofCenter(pos);
 
-                        if (eye.squaredDistanceTo(Vec3d.ofCenter(pos)) > MAX_REACH * MAX_REACH) continue;
+                        // Never touch water right around you
+                        double selfDist = distToPlayer(center, self);
+                        if (selfDist <= SAFE_RADIUS) continue;
+
+                        // Only web water that is closer to another player than to you
+                        double nearestOther = Double.MAX_VALUE;
+                        for (AbstractClientPlayerEntity p : client.world.getPlayers()) {
+                            if (p == self || p.isSpectator()) continue;
+                            nearestOther = Math.min(nearestOther, distToPlayer(center, p));
+                        }
+                        if (selfDist <= nearestOther) continue;
+
+                        if (eye.squaredDistanceTo(center) > MAX_REACH * MAX_REACH) continue;
 
                         if (fluid.isStill()) sources.add(pos);
                         else if (cfg.webFlowingWater) flowing.add(pos);
@@ -143,5 +157,10 @@ public class WebDrainClient implements ClientModInitializer {
             if (player.getInventory().getStack(i).isOf(Items.COBWEB)) return i;
         }
         return -1;
+    }
+
+    // Distance from a point to the player's feet or eyes, whichever is closer
+    private static double distToPlayer(Vec3d point, PlayerEntity p) {
+        return Math.min(point.distanceTo(p.getPos()), point.distanceTo(p.getEyePos()));
     }
 }
