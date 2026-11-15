@@ -6,10 +6,14 @@
   "description": "Instantly drains other players' water by placing cobwebs on it.",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.example.webdrain.WebDrainClient"]
+    "client": ["com.example.webdrain.WebDrainClient"],
+    "modmenu": ["com.example.webdrain.WebDrainModMenu"]
+  },
+  "suggests": {
+    "modmenu": "*"
   },
   "depends": {
-    "fabricloader": ">=0.20.1",
+    "fabricloader": ">=0.18.0",
     "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
