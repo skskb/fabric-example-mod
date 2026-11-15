@@ -1,4 +1,4 @@
-package com.example.webdrain;
+package com.webdrain;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
