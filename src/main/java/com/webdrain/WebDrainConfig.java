@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 public class WebDrainConfig {
     public boolean webFlowingWater = false;
+    public boolean safeRadiusEnabled = true; // protects water within 2 blocks of you
     public int placementsPerTick = 4; // 1-16: webs placed each round
     public int tickDelay = 0;         // 0-20: ticks between rounds (0 = every tick, fastest)
 
